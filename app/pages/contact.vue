@@ -38,31 +38,68 @@ async function submit() {
     return
   }
 
+  if (form.company) {
+    await nextTick()
+    dialog.value?.showModal()
+    return
+  }
+
   sending.value = true
   try {
-    await $fetch('/api/contact', {
+    const response = await fetch(`https://formsubmit.co/ajax/${band.email}`, {
       method: 'POST',
-      body: {
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify({
         name: form.name.trim(),
         email: form.email.trim(),
-        topic: form.topic,
         message: form.message.trim(),
-        company: form.company,
-      },
+        _subject: `[MADLIT] ${form.topic} — ${form.name.trim()}`,
+        _replyto: form.email.trim(),
+        _template: 'table',
+        _captcha: 'false',
+      }),
     })
+    const result = await readSendResult(response)
+    const success = String(result.success ?? '').toLowerCase()
+    const notice = (result.message ?? '').toLowerCase()
+
+    if (success === 'false' && notice.includes('activat')) {
+      error.value = 'Buka Gmail madlitband@gmail.com, termasuk folder spam, lalu klik tautan Activate Form. Setelah itu kirim form sekali lagi.'
+      return
+    }
+
+    const delivered = success === 'true'
+      || success === '1'
+      || notice.includes('submitted successfully')
+      || (response.ok && success !== 'false')
+
+    if (!delivered) {
+      error.value = 'Pesan belum terkirim. Coba lagi sebentar lagi.'
+      return
+    }
+
     form.name = ''
     form.email = ''
     form.message = ''
     form.topic = topics[0] ?? 'Booking show'
     await nextTick()
     dialog.value?.showModal()
-  } catch (caught) {
-    const data = caught && typeof caught === 'object' && 'data' in caught
-      ? caught.data as { statusMessage?: string, message?: string }
-      : undefined
-    error.value = data?.statusMessage || data?.message || 'Pesan belum terkirim. Coba lagi sebentar lagi.'
+  } catch {
+    error.value = 'Pesan belum terkirim. Coba lagi sebentar lagi.'
   } finally {
     sending.value = false
+  }
+}
+
+async function readSendResult(response: Response) {
+  const raw = await response.text()
+  try {
+    return JSON.parse(raw) as { success?: unknown, message?: string }
+  } catch {
+    return { message: raw }
   }
 }
 </script>
