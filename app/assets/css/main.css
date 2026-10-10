@@ -1,0 +1,289 @@
+:root {
+  color-scheme: dark;
+  --bg: #070707;
+  --bg-2: #101010;
+  --text: #f6f3ee;
+  --muted: #b7b1a8;
+  --faint: #8d877f;
+  --line: rgba(255, 255, 255, 0.14);
+  --red: #ff2424;
+  --header: 5.25rem;
+  --font: "Barlow", "Segoe UI", sans-serif;
+  --display: "Bebas Neue", "Arial Narrow", Impact, sans-serif;
+  --wrap: 1120px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#__nuxt {
+  min-height: 100%;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  overflow-x: clip;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+img {
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+a {
+  color: inherit;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+  overflow-wrap: break-word;
+}
+
+::selection {
+  background: var(--red);
+  color: #fff;
+}
+
+:focus-visible {
+  outline: 2px solid var(--red);
+  outline-offset: 3px;
+}
+
+.skip {
+  position: absolute;
+  left: 1rem;
+  top: -4rem;
+  z-index: 80;
+  padding: 0.6rem 0.8rem;
+  background: #fff;
+  color: #000;
+}
+
+.skip:focus {
+  top: 1rem;
+}
+
+.wrap {
+  width: min(var(--wrap), calc(100% - 2.5rem - env(safe-area-inset-left) - env(safe-area-inset-right)));
+  margin-inline: auto;
+}
+
+.kicker {
+  margin: 0 0 0.45rem;
+  color: var(--red);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.lead {
+  max-width: 40rem;
+  color: var(--muted);
+  font-size: 1.15rem;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.9rem;
+  padding: 0.55rem 1.05rem;
+  border: 1px solid #fff;
+  background: transparent;
+  color: #fff;
+  font-family: var(--display);
+  font-size: 1.25rem;
+  letter-spacing: 0.12em;
+  line-height: 1;
+  text-decoration: none;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: #fff;
+  color: #000;
+}
+
+.btn-fill {
+  background: var(--red);
+  border-color: var(--red);
+}
+
+.btn-fill:hover {
+  background: #fff;
+  border-color: #fff;
+  color: #000;
+}
+
+.page {
+  padding: calc(var(--header) + 3.25rem) 0 5rem;
+}
+
+.page-enter-active,
+.page-leave-active {
+  transition: opacity 0.28s ease;
+}
+
+.page-enter-from,
+.page-leave-to {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-enter-active,
+  .page-leave-active {
+    transition: none;
+  }
+}
+
+.prose {
+  display: grid;
+  gap: 1rem;
+  max-width: 42rem;
+  color: var(--muted);
+}
+
+.prose strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem 3rem;
+  align-items: end;
+}
+
+.split > * {
+  min-width: 0;
+}
+
+.rule-list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.rule-list li,
+.rule-list a {
+  display: grid;
+  grid-template-columns: 6.5rem 1fr auto;
+  gap: 1rem;
+  align-items: baseline;
+  padding: 1.05rem 0;
+  border-bottom: 1px solid var(--line);
+  text-decoration: none;
+}
+
+.rule-list a:hover .rule-title {
+  color: var(--red);
+}
+
+.rule-meta {
+  color: var(--faint);
+  font-size: 0.92rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.rule-title {
+  font-family: var(--display);
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  letter-spacing: 0.03em;
+  line-height: 0.9;
+}
+
+.stack {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.note {
+  color: var(--faint);
+  font-size: 0.95rem;
+}
+
+@media (max-width: 800px) {
+  .split {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .rule-list li,
+  .rule-list a {
+    grid-template-columns: 1fr;
+    gap: 0.2rem;
+  }
+}
+
+@media (max-width: 720px) {
+  :root {
+    --header: 4.4rem;
+  }
+
+  body {
+    font-size: 1rem;
+  }
+
+  .wrap {
+    width: min(var(--wrap), calc(100% - 1.5rem - env(safe-area-inset-left) - env(safe-area-inset-right)));
+  }
+
+  .page {
+    padding: calc(var(--header) + 2rem) 0 3.5rem;
+  }
+
+  .lead {
+    font-size: 1.05rem;
+  }
+
+  .kicker {
+    letter-spacing: 0.12em;
+  }
+
+  .btn {
+    letter-spacing: 0.08em;
+    padding-inline: 0.85rem;
+  }
+
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
