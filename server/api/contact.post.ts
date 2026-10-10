@@ -33,10 +33,11 @@ export default defineEventHandler(async (event) => {
   }
 
   const origin = getRequestURL(event).origin
-  let result: { success?: string | boolean, message?: string }
+  let status = 0
+  let payload: unknown
 
   try {
-    result = await $fetch('https://formsubmit.co/ajax/' + inbox, {
+    const response = await $fetch.raw('https://formsubmit.co/ajax/' + inbox, {
       method: 'POST',
       headers: {
         Accept: 'application/json',
@@ -53,21 +54,54 @@ export default defineEventHandler(async (event) => {
         _captcha: 'false',
       },
     })
-  } catch {
-    throw createError({ statusCode: 502, statusMessage: 'Pesan belum terkirim. Coba lagi sebentar lagi.' })
+    status = response.status
+    payload = response._data
+  } catch (error) {
+    const failed = error && typeof error === 'object' ? error as { status?: number, data?: unknown } : undefined
+    status = failed?.status ?? 0
+    payload = failed?.data
   }
 
-  const notice = result.message?.toLowerCase() ?? ''
-  if (notice.includes('activation') || notice.includes('activate')) {
+  const result = readSendResult(payload)
+  const success = String(result.success ?? '').toLowerCase()
+  const notice = result.message.toLowerCase()
+
+  if (success === 'false' && notice.includes('activat')) {
     throw createError({
       statusCode: 403,
       statusMessage: 'Buka Gmail madlitband@gmail.com, termasuk folder spam, lalu klik tautan Activate Form. Setelah itu kirim form sekali lagi.',
     })
   }
 
-  if (result.success !== 'true' && result.success !== true) {
+  const delivered = success === 'true'
+    || success === '1'
+    || notice.includes('submitted successfully')
+    || (status >= 200 && status < 300 && success !== 'false')
+
+  if (!delivered) {
     throw createError({ statusCode: 502, statusMessage: 'Pesan belum terkirim. Coba lagi sebentar lagi.' })
   }
 
   return { ok: true }
 })
+
+function readSendResult(payload: unknown) {
+  let data = payload
+  if (typeof data === 'string') {
+    try {
+      data = JSON.parse(data)
+    } catch {
+      return { success: undefined, message: data }
+    }
+  }
+
+  if (data && typeof data === 'object') {
+    const record = data as { success?: unknown, message?: unknown }
+    return {
+      success: record.success,
+      message: typeof record.message === 'string' ? record.message : '',
+    }
+  }
+
+  return { success: undefined, message: '' }
+}

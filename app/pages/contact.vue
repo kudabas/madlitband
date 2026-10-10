@@ -15,12 +15,19 @@ const form = reactive({
   company: '',
 })
 const error = ref('')
-const sent = ref(false)
 const sending = ref(false)
+const dialog = ref<HTMLDialogElement | null>(null)
+
+function closeModal() {
+  dialog.value?.close()
+}
+
+function onBackdrop(event: MouseEvent) {
+  if (event.target === dialog.value) closeModal()
+}
 
 async function submit() {
   error.value = ''
-  sent.value = false
 
   if (!form.name.trim() || !form.email.trim() || !form.message.trim()) {
     error.value = 'Nama, email, dan pesan wajib diisi.'
@@ -43,11 +50,12 @@ async function submit() {
         company: form.company,
       },
     })
-    sent.value = true
     form.name = ''
     form.email = ''
     form.message = ''
     form.topic = topics[0] ?? 'Booking show'
+    await nextTick()
+    dialog.value?.showModal()
   } catch (caught) {
     const data = caught && typeof caught === 'object' && 'data' in caught
       ? caught.data as { statusMessage?: string, message?: string }
@@ -100,13 +108,18 @@ async function submit() {
             <input v-model="form.company" name="company" type="text" tabindex="-1" autocomplete="off">
           </label>
           <p v-if="error" class="error">{{ error }}</p>
-          <p v-else-if="sent" class="success">Pesan terkirim ke {{ band.email }}.</p>
           <button type="submit" class="btn btn-fill" :disabled="sending">
             {{ sending ? 'Mengirim...' : 'Kirim lewat email' }}
           </button>
         </form>
       </div>
     </div>
+
+    <dialog ref="dialog" class="sent-modal" @click="onBackdrop">
+      <p class="kicker">Kontak</p>
+      <h2>Pesan terkirim! Terimakasih kami akan membalas secepatnya!!!</h2>
+      <button type="button" class="btn btn-fill" @click="closeModal">Tutup</button>
+    </dialog>
   </article>
 </template>
 
@@ -157,15 +170,34 @@ textarea {
   resize: vertical;
 }
 
-.error,
-.success {
+.error {
   margin: 0;
+  color: var(--red);
   letter-spacing: 0;
   text-transform: none;
 }
 
-.error {
-  color: var(--red);
+.sent-modal {
+  width: min(32rem, calc(100vw - 1.5rem));
+  margin: auto;
+  padding: 1.4rem;
+  border: 1px solid var(--line);
+  background: #000;
+  color: #fff;
+}
+
+.sent-modal::backdrop {
+  background: rgba(0, 0, 0, 0.82);
+}
+
+.sent-modal h2 {
+  margin: 0.35rem 0 1.2rem;
+  font-family: var(--display);
+  font-size: clamp(2rem, 6vw, 3rem);
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  line-height: 0.92;
+  text-transform: uppercase;
 }
 
 .honey {
